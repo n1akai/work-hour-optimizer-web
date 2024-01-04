@@ -23,6 +23,7 @@ import { ref, computed, watch, onMounted } from "vue";
 // Refs
 const counter = ref(6000000);
 const breakCounter = ref(150000);
+const totalTime = ref(0);
 const isPlaying = ref(false);
 const intervalId = ref();
 const isBreakTime = ref(false);
@@ -42,10 +43,12 @@ onMounted(() => {
     if (today) {
       counter.value = today.counter;
       breakCounter.value = today.breakCounter;
+      totalTime.value = today.totalTime;
     } else {
       allDays[todayId] = {
         counter: counter.value,
         breakCounter: breakCounter.value,
+        isDone: false,
         acheivedGoals: []
       };
       localStorage.setItem("data", JSON.stringify(allDays));
@@ -55,6 +58,8 @@ onMounted(() => {
     allDays[todayId] = {
       counter: counter.value,
       breakCounter: breakCounter.value,
+      totalTime: totalTime.value,
+      isDone: false,
       acheivedGoals: []
     };
     localStorage.setItem("data", JSON.stringify(allDays));
@@ -108,6 +113,7 @@ const countDownTimer = (ref) => {
   intervalId.value = setInterval(() => {
     const spendedTime = new Date().getTime() - startTime;
     ref.value -= spendedTime;
+    totalTime.value += spendedTime;
     startTime += spendedTime;
   }, 500);
 };
@@ -118,7 +124,8 @@ const saveInLocal = () => {
 
   allDays[todayId].counter = counter.value;
   allDays[todayId].breakCounter = breakCounter.value;
-
+  allDays[todayId].totalTime = totalTime.value;
+  allDays[todayId].isDone = counter.value == 0 ? true : false;
   localStorage.setItem("data", JSON.stringify(allDays));
 };
 
@@ -136,7 +143,7 @@ const getTodayId = () => {
   const d = date.getDate();
   const m = date.getMonth() + 1;
   const y = date.getFullYear();
-  return `${d}-${m}-${y}`;
+  return `${m}-${d}-${y}`;
 };
 </script>
 <style scoped>
